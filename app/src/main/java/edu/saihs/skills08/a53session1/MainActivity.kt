@@ -113,12 +113,19 @@ fun home() {
                                             drawerState.close()
                                         }
                                     }
+                                    2-> {
+                                        navController.navigate("art")
+                                        scope.launch {
+                                            drawerState.close()
+                                        }
+                                    }
                                     5-> {
                                         navController.navigate("main")
                                         scope.launch {
                                             drawerState.close()
                                         }
                                     }
+
                                 }
 
                             },
