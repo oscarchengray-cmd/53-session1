@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,13 +32,24 @@ import okio.blackholeSink
 @Composable
 fun floorpage(){
     var click by remember { mutableStateOf(0) }
-
     Column() {
         Row() {
-            for (i in 1..2)
-                OutlinedButton(onClick = {if (i==1) click=1 else click=2}, shape = RoundedCornerShape(0.dp), modifier = Modifier.padding(10.dp),) {
-                    Text(if (i==1) "一館" else "二館", color = Color.Black, fontWeight = FontWeight.Bold)
+            for (i in 1..2) {
+                OutlinedButton(
+                    onClick = { if (i == 1) click = 1 else click = 2 },
+                    shape = RoundedCornerShape(0.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (i == click) Color(0xff11617f) else Color.White
+                    )
+                ) {
+                    Text(
+                        if (i == 1) "一館" else "二館",
+                        color = if (i == click) Color.White else Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
+            }
         }
         if (click==1){
             Image(
