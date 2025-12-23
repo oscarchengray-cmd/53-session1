@@ -160,7 +160,7 @@ fun home() {
         val currentRoute = navBackStackEntry?.destination?.route
         Scaffold(
             topBar = {
-                if (currentRoute.toString() == "main inside/{context}") {
+                if (currentRoute.toString() == "main inside/{page2id}") {
                     TopAppBar(
                         title = { "" },
                         navigationIcon = {
@@ -228,10 +228,10 @@ fun home() {
                 ) {
                     composable("main") { mainpage(navController) }
                     composable(
-                        route = "main inside/{context}",
-                        arguments = listOf(navArgument("context") { type = NavType.IntType })
+                        route = "main inside/{page2id}",
+                        arguments = listOf(navArgument("page2id") { type = NavType.IntType })
                     ) { it ->
-                        val page2id = it.arguments?.getInt("context") ?: 0
+                        val page2id = it.arguments?.getInt("page2id") ?: 0
                         maininsidepage(navController, page2id)
                     }
                     composable("3dfloor") { floorpage() }
@@ -240,7 +240,6 @@ fun home() {
                     composable("owner") { ownerpage() }
                     composable ( "callwe" ){callwepage()}
                     composable ("ticket"){ ticketpage() }
-
                 }
             }
         }
