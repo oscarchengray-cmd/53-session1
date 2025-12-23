@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -97,6 +99,18 @@ fun home() {
                                             drawerState.close()
                                         }
                                     }
+                                    3->{
+                                        navController.navigate("callwe")
+                                        scope.launch {
+                                            drawerState.close()
+                                        }
+                                    }
+                                    4-> {
+                                        navController.navigate("ticket")
+                                        scope.launch {
+                                            drawerState.close()
+                                        }
+                                    }
                                     5-> {
                                         navController.navigate("main")
                                         scope.launch {
@@ -140,7 +154,7 @@ fun home() {
                 }
             }
         },
-        gesturesEnabled = false
+        gesturesEnabled = true
         ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
@@ -162,6 +176,23 @@ fun home() {
 
                         }
                     )
+                }else if (currentRoute.toString()=="ticket"){
+                    CenterAlignedTopAppBar(
+                        title = {Text("2022第41屆新一代設計展", fontWeight = FontWeight.Bold, color = Color(0xff2B6F82),)},
+                        navigationIcon = {
+                            IconButton(onClick = { navController.navigate("main") }) {
+                                Icon(
+                                    Icons.Default.KeyboardArrowLeft, null,
+                                    tint = Color(0xff2B6F82),
+                                    modifier = Modifier.size(50.dp)
+
+                                )
+
+                            }
+
+                        }
+                    )
+
                 } else {
                     Box(
                         modifier = Modifier
@@ -207,6 +238,8 @@ fun home() {
                     composable("art") { artpage() }
                     composable("introduce") { introducepage() }
                     composable("owner") { ownerpage() }
+                    composable ( "callwe" ){callwepage()}
+                    composable ("ticket"){ ticketpage() }
 
                 }
             }
