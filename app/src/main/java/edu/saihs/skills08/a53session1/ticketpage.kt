@@ -14,16 +14,36 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 
+
+class MyViewModel : ViewModel() {
+    private val _numbers = MutableLiveData<List<Int>>(listOf(0,0,0,0,0))
+    val numbers: LiveData<List<Int>> = _numbers
+    fun updateNumberAt(index: Int, newValue: Int) {
+        val currentList = _numbers.value?.toMutableList() ?: return
+        if (index in currentList.indices) {
+            currentList[index] = newValue
+            _numbers.value = currentList
+        }
+    }
+}
 @Composable
-fun ticketpage() {
-    var amount = remember { mutableStateListOf<Int>(0, 0, 0, 0, 0) }
+fun ticketpage(navController: NavHostController, viewModel: MyViewModel = viewModel()) {
+    val amount by viewModel.numbers.observeAsState(initial = emptyList())
     var name = listOf("一日票", "雙日票", "優待票", "敬老票", "學生票")
     Column() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
@@ -46,14 +66,18 @@ fun ticketpage() {
                         Row(
                             horizontalArrangement = Arrangement.End
                         ) {
-                            IconButton(onClick = { if (amount[index] > 0) amount[index] -= 1 }) {
+                            IconButton(onClick = {
+                                if (amount[index] > 0) {
+                                    viewModel.updateNumberAt(index, it-1)
+                                } }) {
                                 Icon(
-                                    painterResource(id = R.drawable.outline_remove_circle_outline_24),
-                                    null
+                                    painterResource(id = R.drawable.outline_remove_circle_outline_24), null
                                 )
                             }
                             Text(it.toString(), modifier = Modifier.padding(10.dp))
-                            IconButton(onClick = { amount[index] += 1 }) {
+                            IconButton(onClick = {
+                                viewModel.updateNumberAt(index, it+1)
+                                 }) {
                                 Icon(
                                     painterResource(id = R.drawable.outline_add_circle_24), null
                                 )
@@ -70,10 +94,28 @@ fun ticketpage() {
                 .padding(30.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = {}, shape = RoundedCornerShape(10.dp)) {
+            Button(
+                onClick = { navController.navigate("ticketinside") },
+                shape = RoundedCornerShape(10.dp)
+            ) {
                 Text("下一步")
             }
         }
     }
 
+}
+
+@Composable
+fun ticketinsidepage(viewModel: MyViewModel = viewModel()){
+    val amount by viewModel.numbers.observeAsState(initial = emptyList())
+    var name = listOf("一日票", "雙日票", "優待票", "敬老票", "學生票")
+    Column() {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Column() {
+                amount.forEach {  it ->
+                    Text(it.toString())
+                }
+            }
+        }
+    }
 }

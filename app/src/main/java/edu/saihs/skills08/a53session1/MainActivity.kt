@@ -73,45 +73,51 @@ fun home() {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                drawer.forEachIndexed {index,it->
+                drawer.forEachIndexed { index, it ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(Modifier
-                            .padding(start = 10.dp)
-                            .size(20.dp, 20.dp)
-                            .background(color = Color(0xff11617F))) {
+                        Box(
+                            Modifier
+                                .padding(start = 10.dp)
+                                .size(20.dp, 20.dp)
+                                .background(color = Color(0xff11617F))
+                        ) {
                         }
                         NavigationDrawerItem(
                             label = { Text(it) },
                             selected = false,
                             onClick = {
-                                when(index){
-                                    1-> {
+                                when (index) {
+                                    1 -> {
                                         navController.navigate("3dfloor")
                                         scope.launch {
                                             drawerState.close()
                                         }
                                     }
-                                    2-> {
+
+                                    2 -> {
                                         navController.navigate("art")
                                         scope.launch {
                                             drawerState.close()
                                         }
                                     }
-                                    3->{
+
+                                    3 -> {
                                         navController.navigate("callwe")
                                         scope.launch {
                                             drawerState.close()
                                         }
                                     }
-                                    4-> {
+
+                                    4 -> {
                                         navController.navigate("ticket")
                                         scope.launch {
                                             drawerState.close()
                                         }
                                     }
-                                    5-> {
+
+                                    5 -> {
                                         navController.navigate("main")
                                         scope.launch {
                                             drawerState.close()
@@ -121,12 +127,12 @@ fun home() {
                                 }
 
                             },
-                            modifier = Modifier.size(height = 50.dp,width = 200.dp)
+                            modifier = Modifier.size(height = 50.dp, width = 200.dp)
                         )
                     }
 
                     if (it == "關於展館") {
-                        about.forEachIndexed {index,it->
+                        about.forEachIndexed { index, it ->
                             Row(
                                 modifier = Modifier
                                     .padding(start = 40.dp),
@@ -141,12 +147,14 @@ fun home() {
                                     label = { Text(it) },
                                     selected = false,
                                     onClick = {
-                                        if (index==0) navController.navigate("owner") else navController.navigate("introduce")
+                                        if (index == 0) navController.navigate("owner") else navController.navigate(
+                                            "introduce"
+                                        )
                                         scope.launch {
                                             drawerState.close()
                                         }
                                     },
-                                    modifier = Modifier.size(height =  40.dp,width = 200.dp)
+                                    modifier = Modifier.size(height = 40.dp, width = 200.dp)
                                 )
                             }
                         }
@@ -155,7 +163,7 @@ fun home() {
             }
         },
         gesturesEnabled = true
-        ) {
+    ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         Scaffold(
@@ -169,30 +177,29 @@ fun home() {
                                     Icons.Default.KeyboardArrowLeft, null,
                                     tint = Color(0xff2B6F82),
                                     modifier = Modifier.size(50.dp)
-
                                 )
-
                             }
-
                         }
                     )
-                }else if (currentRoute.toString()=="ticket"){
+                } else if (currentRoute.toString() == "ticket") {
                     CenterAlignedTopAppBar(
-                        title = {Text("2022第41屆新一代設計展", fontWeight = FontWeight.Bold, color = Color(0xff2B6F82),)},
+                        title = {
+                            Text(
+                                "2022第41屆新一代設計展",
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xff2B6F82),
+                            )
+                        },
                         navigationIcon = {
                             IconButton(onClick = { navController.navigate("main") }) {
                                 Icon(
                                     Icons.Default.KeyboardArrowLeft, null,
                                     tint = Color(0xff2B6F82),
                                     modifier = Modifier.size(50.dp)
-
                                 )
-
                             }
-
                         }
                     )
-
                 } else {
                     Box(
                         modifier = Modifier
@@ -238,11 +245,11 @@ fun home() {
                     composable("art") { artpage() }
                     composable("introduce") { introducepage() }
                     composable("owner") { ownerpage() }
-                    composable ( "callwe" ){callwepage()}
-                    composable ("ticket"){ ticketpage() }
+                    composable("callwe") { callwepage() }
+                    composable("ticket") { ticketpage(navController) }
+                    composable("ticketinside") { ticketinsidepage() }
                 }
             }
         }
     }
 }
-
