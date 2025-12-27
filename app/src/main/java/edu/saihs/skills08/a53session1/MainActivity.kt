@@ -39,6 +39,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,10 +64,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+class MyViewModel : ViewModel() {
+    private val _numbers = MutableLiveData<List<Int>>(listOf(0, 0, 0, 0, 0))
+    val numbers: LiveData<List<Int>> = _numbers
+    fun updateNumberAt(index: Int, newValue: Int) {
+        val currentList = _numbers.value?.toMutableList() ?: return
+        if (index in currentList.indices) {
+            currentList[index] = newValue
+            _numbers.value = currentList
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun home() {
+    val viewModel: MyViewModel = viewModel()
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -246,8 +262,8 @@ fun home() {
                     composable("introduce") { introducepage() }
                     composable("owner") { ownerpage() }
                     composable("callwe") { callwepage() }
-                    composable("ticket") { ticketpage(navController) }
-                    composable("ticketinside") { ticketinsidepage() }
+                    composable("ticket") { ticketpage(navController, viewModel) }
+                    composable("ticketinside") { ticketinsidepage(navController, viewModel) }
                 }
             }
         }
