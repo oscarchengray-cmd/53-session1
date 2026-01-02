@@ -5,6 +5,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,13 +19,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,7 +49,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ticketinsidepage(navController: NavHostController, viewModel: MyViewModel = viewModel()) {
     val amount by viewModel.numbers.observeAsState(initial = emptyList())
@@ -53,6 +65,8 @@ fun ticketinsidepage(navController: NavHostController, viewModel: MyViewModel = 
     var text3 by remember() { mutableStateOf("") }
     var text4 by remember() { mutableStateOf("") }
     var text5 by remember() { mutableStateOf("") }
+    val datePickerState = rememberDatePickerState()
+    var showDialog by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -154,6 +168,14 @@ fun ticketinsidepage(navController: NavHostController, viewModel: MyViewModel = 
             modifier = Modifier
                 .padding(vertical = 10.dp)
                 .size(400.dp, 50.dp)
+                .clickable{showDialog = true},
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = Color.Black,
+                disabledBorderColor = Color.Gray,
+                disabledLabelColor = Color.DarkGray
+            ),
+            enabled = false
+
         )
         Text("付款方式")
         OutlinedTextField(
@@ -197,7 +219,31 @@ fun ticketinsidepage(navController: NavHostController, viewModel: MyViewModel = 
                 Text("確認購買")
             }
         }
-
+        if (showDialog) {
+            DatePickerDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val date = datePickerState.selectedDateMillis
+                        if (date != null) {
+                            val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+                            text4 = formatter.format(Date(date))
+                        }
+                        showDialog = false
+                    }) {
+                        Text("確定")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("取消")
+                    }
+                }
+            ) {
+                // 3. 放入 DatePicker 本體
+                DatePicker(state = datePickerState)
+            }
+        }
     }
 
 }

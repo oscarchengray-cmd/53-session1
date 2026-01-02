@@ -51,47 +51,40 @@ data class Media(
 @Composable
 fun mainpage(navController: NavHostController) {
     var context = LocalContext.current
-    val json = context.assets
-            .open("媒體中心.json")
-            .bufferedReader()
-            .use {
-                it.readText()
-            }
+    val json = context.assets.open("媒體中心.json").bufferedReader().use {
+        it.readText()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
-        Arrangement.Top
+            .background(Color.White), Arrangement.Top
     ) {
         val pagerState = rememberPagerState(pageCount = { 2 })
         HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxWidth()
+            state = pagerState, modifier = Modifier.fillMaxWidth()
         ) { page ->
-            Column() {
-                when (page) {
-                    0 -> {
-                        Image(
-                            painter = painterResource(id = R.drawable.pager0),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .height(250.dp)
-                                .fillMaxWidth(),
-                            contentScale = ContentScale.Crop,
-                        )
-                    }
-
-                    1 -> Image(
-                        painter = painterResource(id = R.drawable.pager1),
+            when (page) {
+                0 -> {
+                    Image(
+                        painter = painterResource(id = R.drawable.pager0),
                         contentDescription = null,
                         modifier = Modifier
                             .height(250.dp)
                             .fillMaxWidth(),
                         contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center
                     )
                 }
+
+                1 -> Image(
+                    painter = painterResource(id = R.drawable.pager1),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(250.dp)
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center
+                )
             }
         }
         Row(
@@ -109,13 +102,11 @@ fun mainpage(navController: NavHostController) {
                 Box(
                     modifier = Modifier
                         .background(
-                            color = animatedColor,
-                            shape = RoundedCornerShape(10.dp)
+                            color = animatedColor, shape = RoundedCornerShape(10.dp)
                         )
                         .animateContentSize()
                         .size(
-                            if (pagerState.currentPage == i - 1) 20.dp else 10.dp,
-                            10.dp
+                            if (pagerState.currentPage == i - 1) 20.dp else 10.dp, 10.dp
                         )
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
@@ -179,7 +170,7 @@ fun mainpage(navController: NavHostController) {
                                 verticalAlignment = Alignment.Bottom
                             ) {
                                 Text("YODEX", fontSize = 20.sp)
-                                OutlinedButton(onClick = { }) {
+                                OutlinedButton(onClick = { navController.navigate("ticket") }) {
                                     Text("購票")
                                 }
                             }

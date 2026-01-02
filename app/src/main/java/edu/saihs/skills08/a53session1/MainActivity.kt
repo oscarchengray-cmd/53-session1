@@ -127,7 +127,7 @@ fun home() {
                                     }
 
                                     4 -> {
-                                        navController.navigate("ticket")
+                                        navController.navigate("allticket")
                                         scope.launch {
                                             drawerState.close()
                                         }
@@ -264,6 +264,7 @@ fun home() {
                     composable("callwe") { callwepage() }
                     composable("ticket") { ticketpage(navController, viewModel) }
                     composable("ticketinside") { ticketinsidepage(navController, viewModel) }
+                    composable("allticket") { allticketpage() }
                 }
             }
         }
