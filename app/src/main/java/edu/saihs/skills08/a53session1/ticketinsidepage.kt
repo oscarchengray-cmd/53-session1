@@ -43,7 +43,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 
 @Composable
-fun ticketinsidepage(navController: NavHostController, viewModel: MyViewModel = viewModel()) {
+fun ticketinsidepage(
+    navController: NavHostController,
+    viewModel: MyViewModel = viewModel(),
+    viewModel2: TicketViewModel
+) {
     val amount by viewModel.numbers.observeAsState(initial = emptyList())
     var name = listOf("一日票", "雙日票", "優待票", "敬老票", "學生票")
     var total = 0
@@ -197,7 +201,5 @@ fun ticketinsidepage(navController: NavHostController, viewModel: MyViewModel = 
                 Text("確認購買")
             }
         }
-
     }
-
 }

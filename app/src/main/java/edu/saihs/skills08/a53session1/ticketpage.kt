@@ -37,15 +37,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-
-
 @Composable
 fun ticketpage(navController: NavHostController, viewModel: MyViewModel = viewModel()) {
     val amount by viewModel.numbers.observeAsState(initial = emptyList())
     var name = listOf("一日票", "雙日票", "優待票", "敬老票", "學生票")
     var total = 0
     var context = LocalContext.current
-
     Column() {
         Row(
             modifier = Modifier
@@ -134,6 +131,3 @@ fun ticketpage(navController: NavHostController, viewModel: MyViewModel = viewMo
         }
     }
 }
-
-
-

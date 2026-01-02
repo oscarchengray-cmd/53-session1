@@ -11,8 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
+import androidx.room.Database
+
+
 
 @Composable
-fun allticketpage(){
+fun allticketpage(viewModel: TicketViewModel){
     
 }

@@ -59,8 +59,13 @@ import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import androidx.room.Upsert
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import edu.saihs.skills08.a53session1.ui.theme._53Session1Theme
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -90,29 +95,67 @@ class MyViewModel : ViewModel() {
     }
 }
 
+// 1. Entity (資料表)
 @Entity(tableName = "ticketroom")
 data class Ticket(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val email: String,
     val phone: String,
     val date: String,
     val pay: String,
-    val ticketList: List<String>
+    val ticketList: List<Int> // Room 預設不認識這個，需要轉換器
 )
 
-@Dao
-interface TicketDao {
-    @Query("SELECT * FROM ticketroom")
-    fun getAll(): kotlinx.coroutines.flow.Flow<List<Ticket>>
-    @Insert
-    fun insert(ticket: Ticket)
+// 2. TypeConverter (轉換器：List <-> String)
+class TicketConverters {
+    @TypeConverter
+    fun fromStringList(value: List<String>?): String = Gson().toJson(value)
+
+    @TypeConverter
+    fun toStringList(value: String): List<Int> {
+        val listType = object : TypeToken<List<Int>>() {}.type
+        return Gson().fromJson(value, listType)
+    }
 }
 
+// 3. DAO (指令介面)
+@Dao
+interface TicketDao {
+    @Upsert
+    suspend fun insertTicket(ticket: Ticket)
 
+    @Query("SELECT * FROM ticketroom ORDER BY id DESC")
+    fun getAllTickets(): Flow<List<Ticket>> // 用 Flow 實現即時讀取
+}
 
+// 4. Database (總管中心)
+@Database(entities = [Ticket::class], version = 1)
+@TypeConverters(TicketConverters::class) // 註冊轉換器
+abstract class AppDatabase : RoomDatabase() {
+    abstract val dao: TicketDao
+}
 
+class TicketViewModel(private val dao: TicketDao) : ViewModel() {
+    // 讀取：將 Flow 轉為 StateFlow
+    val tickets: StateFlow<List<Ticket>> = dao.getAllTickets()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // 存入：在背景執行
+    fun saveTicket(name: String, email: String, phone: String, date: String,pay: String, ticketsSelected: List<Int>) {
+        viewModelScope.launch {
+            val newEntry = Ticket(
+                name = name,
+                email = email,
+                phone = phone,
+                date = date,
+                pay = pay,
+                ticketList = ticketsSelected
+            )
+            dao.insertTicket(newEntry)
+        }
+    }
+}
 
 
 
@@ -120,7 +163,9 @@ interface TicketDao {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun home() {
+
     val viewModel: MyViewModel = viewModel()
+    val ticketViewModel: TicketViewModel = viewModel()
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -304,8 +349,8 @@ fun home() {
                     composable("owner") { ownerpage() }
                     composable("callwe") { callwepage() }
                     composable("ticket") { ticketpage(navController,viewModel) }
-                    composable("ticketinside") { ticketinsidepage(navController, viewModel) }
-                    composable("allticket") { allticketpage() }
+                    composable("ticketinside") { ticketinsidepage(navController, viewModel,ticketViewModel) }
+                    composable("allticket") { allticketpage(ticketViewModel) }
                 }
             }
         }
