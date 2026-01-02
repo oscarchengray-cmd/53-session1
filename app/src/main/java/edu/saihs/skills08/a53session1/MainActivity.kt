@@ -30,18 +30,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -49,7 +52,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.room.Dao
+import androidx.room.Database
+import androidx.room.Entity
+import androidx.room.Insert
+import androidx.room.PrimaryKey
+import androidx.room.Query
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import edu.saihs.skills08.a53session1.ui.theme._53Session1Theme
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -75,6 +89,29 @@ class MyViewModel : ViewModel() {
         }
     }
 }
+
+@Entity(tableName = "ticketroom")
+data class Ticket(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val name: String,
+    val email: String,
+    val phone: String,
+    val date: String,
+    val pay: String,
+    val ticketList: List<String>
+)
+
+@Dao
+interface TicketDao {
+    @Query("SELECT * FROM ticketroom")
+    fun getAll(): kotlinx.coroutines.flow.Flow<List<Ticket>>
+    @Insert
+    fun insert(ticket: Ticket)
+}
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,7 +164,7 @@ fun home() {
                                     }
 
                                     4 -> {
-                                        navController.navigate("ticket")
+                                        navController.navigate("allticket")
                                         scope.launch {
                                             drawerState.close()
                                         }
@@ -262,8 +299,9 @@ fun home() {
                     composable("introduce") { introducepage() }
                     composable("owner") { ownerpage() }
                     composable("callwe") { callwepage() }
-                    composable("ticket") { ticketpage(navController, viewModel) }
+                    composable("ticket") { ticketpage(navController,viewModel) }
                     composable("ticketinside") { ticketinsidepage(navController, viewModel) }
+                    composable("allticket") { allticketpage() }
                 }
             }
         }
