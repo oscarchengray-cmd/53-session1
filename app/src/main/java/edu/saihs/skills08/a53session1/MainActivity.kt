@@ -109,16 +109,16 @@ data class Ticket(
 )
 
 // 2. TypeConverter (轉換器：List <-> String)
-//class TicketConverters {
-//    @TypeConverter
-//    fun fromStringList(value: List<Int>?): String = Gson().toJson(value)
-//
-//    @TypeConverter
-//    fun toStringList(value: String): List<Int> {
-//        val listType = object : TypeToken<List<Int>>() {}.type
-//        return Gson().fromJson(value, listType)
-//    }
-//}
+class TicketConverters {
+    @TypeConverter
+    fun fromStringList(value: List<Int>?): String = Gson().toJson(value)
+
+    @TypeConverter
+    fun toStringList(value: String): List<Int> {
+        val listType = object : TypeToken<List<Int>>() {}.type
+        return Gson().fromJson(value, listType)
+    }
+}
 
 @Dao
 interface TicketDao {
