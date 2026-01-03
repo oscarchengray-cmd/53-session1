@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,11 +27,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,13 +47,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ticketinsidepage(
     navController: NavHostController,
     viewModel: MyViewModel = viewModel(),
-    viewModel2: TicketViewModel
+    db: AppDatabase
 ) {
+    val scope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
     val amount by viewModel.numbers.observeAsState(initial = emptyList())
     var name = listOf("一日票", "雙日票", "優待票", "敬老票", "學生票")
     var total = 0
@@ -155,9 +171,13 @@ fun ticketinsidepage(
         OutlinedTextField(
             value = text4,
             onValueChange = { text4 = it },
+            readOnly = true,
             modifier = Modifier
                 .padding(vertical = 10.dp)
                 .size(400.dp, 50.dp)
+                .clickable{showDialog = true},
+            enabled = false
+
         )
         Text("付款方式")
         OutlinedTextField(
@@ -182,6 +202,7 @@ fun ticketinsidepage(
             Spacer(modifier = Modifier.padding(10.dp))
             Button(
                 onClick = {
+                    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(text2).matches()
                     if (text1.length > 15 || text1 == "") {
                         Toast.makeText(context, "姓名格式錯誤", Toast.LENGTH_SHORT).show()
                     } else if (text2.length > 30 || android.util.Patterns.EMAIL_ADDRESS.matcher(
@@ -193,12 +214,49 @@ fun ticketinsidepage(
                         Toast.makeText(context, "電話格式錯誤", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(context, "送出成功", Toast.LENGTH_SHORT).show()
+
+                        scope.launch {
+                            db.dao.insertTicket(
+                                Ticket(
+                                    name = text1,
+                                    email = text2,
+                                    phone = text3,
+                                    date = text4,
+                                    pay = text5,
+                                    ticketList = amount
+                                )
+                            )
+                        }
                     }
                 },
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(Color(0xff11617F))
             ) {
                 Text("確認購買")
+            }
+        }
+        if (showDialog) {
+            DatePickerDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val date = datePickerState.selectedDateMillis
+                        if (date != null) {
+                            val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+                            text4 = formatter.format(Date(date))
+                        }
+                        showDialog = false
+                    }) {
+                        Text("確定")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("取消")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
             }
         }
     }

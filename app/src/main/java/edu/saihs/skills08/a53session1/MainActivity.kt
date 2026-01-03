@@ -58,6 +58,7 @@ import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
@@ -104,57 +105,35 @@ data class Ticket(
     val phone: String,
     val date: String,
     val pay: String,
-    val ticketList: List<Int> // Room 預設不認識這個，需要轉換器
+    val ticketList: List<Int>
 )
 
 // 2. TypeConverter (轉換器：List <-> String)
-class TicketConverters {
-    @TypeConverter
-    fun fromStringList(value: List<String>?): String = Gson().toJson(value)
+//class TicketConverters {
+//    @TypeConverter
+//    fun fromStringList(value: List<Int>?): String = Gson().toJson(value)
+//
+//    @TypeConverter
+//    fun toStringList(value: String): List<Int> {
+//        val listType = object : TypeToken<List<Int>>() {}.type
+//        return Gson().fromJson(value, listType)
+//    }
+//}
 
-    @TypeConverter
-    fun toStringList(value: String): List<Int> {
-        val listType = object : TypeToken<List<Int>>() {}.type
-        return Gson().fromJson(value, listType)
-    }
-}
-
-// 3. DAO (指令介面)
 @Dao
 interface TicketDao {
     @Upsert
     suspend fun insertTicket(ticket: Ticket)
 
     @Query("SELECT * FROM ticketroom ORDER BY id DESC")
-    fun getAllTickets(): Flow<List<Ticket>> // 用 Flow 實現即時讀取
+    fun getAllTickets(): List<Ticket> // 用 Flow 實現即時讀取
 }
 
 // 4. Database (總管中心)
 @Database(entities = [Ticket::class], version = 1)
-@TypeConverters(TicketConverters::class) // 註冊轉換器
+//@TypeConverters(TicketConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract val dao: TicketDao
-}
-
-class TicketViewModel(private val dao: TicketDao) : ViewModel() {
-    // 讀取：將 Flow 轉為 StateFlow
-    val tickets: StateFlow<List<Ticket>> = dao.getAllTickets()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    // 存入：在背景執行
-    fun saveTicket(name: String, email: String, phone: String, date: String,pay: String, ticketsSelected: List<Int>) {
-        viewModelScope.launch {
-            val newEntry = Ticket(
-                name = name,
-                email = email,
-                phone = phone,
-                date = date,
-                pay = pay,
-                ticketList = ticketsSelected
-            )
-            dao.insertTicket(newEntry)
-        }
-    }
 }
 
 
@@ -163,9 +142,11 @@ class TicketViewModel(private val dao: TicketDao) : ViewModel() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun home() {
-
     val viewModel: MyViewModel = viewModel()
-    val ticketViewModel: TicketViewModel = viewModel()
+    val db = Room.databaseBuilder(
+        LocalContext.current,
+        AppDatabase::class.java, "database-name"
+    ).build()
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -349,8 +330,8 @@ fun home() {
                     composable("owner") { ownerpage() }
                     composable("callwe") { callwepage() }
                     composable("ticket") { ticketpage(navController,viewModel) }
-                    composable("ticketinside") { ticketinsidepage(navController, viewModel,ticketViewModel) }
-                    composable("allticket") { allticketpage(ticketViewModel) }
+                    composable("ticketinside") { ticketinsidepage(navController, viewModel,db) }
+                    composable("allticket") { allticketpage(db) }
                 }
             }
         }
