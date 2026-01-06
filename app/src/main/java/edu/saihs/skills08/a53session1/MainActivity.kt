@@ -108,7 +108,7 @@ data class Ticket(
     val ticketList: List<Int>
 )
 
-// 2. TypeConverter (轉換器：List <-> String)
+
 class TicketConverters {
     @TypeConverter
     fun fromStringList(value: List<Int>?): String = Gson().toJson(value)
@@ -126,12 +126,12 @@ interface TicketDao {
     suspend fun insertTicket(ticket: Ticket)
 
     @Query("SELECT * FROM ticketroom ORDER BY id DESC")
-    fun getAllTickets(): List<Ticket> // 用 Flow 實現即時讀取
+    fun getAllTickets(): Flow<List<Ticket>>
 }
 
-// 4. Database (總管中心)
+
 @Database(entities = [Ticket::class], version = 1)
-//@TypeConverters(TicketConverters::class)
+@TypeConverters(TicketConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract val dao: TicketDao
 }
@@ -150,7 +150,7 @@ fun home() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val drawer = listOf("關於展館", "樓層立體圖", "公共藝術", "聯絡我們", "全部票卡", "主畫面")
+    val drawer = listOf("關於展館", "樓層立體圖", "公共藝術", "聯絡我們", "全部票卡", "主畫面","關於我")
     val about = listOf("經營者", "展館介紹")
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -166,6 +166,9 @@ fun home() {
                                 .size(20.dp, 20.dp)
                                 .background(color = Color(0xff11617F))
                         ) {
+
+
+
                         }
                         NavigationDrawerItem(
                             label = { Text(it) },
@@ -202,6 +205,12 @@ fun home() {
 
                                     5 -> {
                                         navController.navigate("main")
+                                        scope.launch {
+                                            drawerState.close()
+                                        }
+                                    }
+                                    6 -> {
+                                        navController.navigate("aboutme")
                                         scope.launch {
                                             drawerState.close()
                                         }
@@ -245,7 +254,7 @@ fun home() {
                 }
             }
         },
-        gesturesEnabled = true
+        gesturesEnabled = false
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
@@ -332,6 +341,7 @@ fun home() {
                     composable("ticket") { ticketpage(navController,viewModel) }
                     composable("ticketinside") { ticketinsidepage(navController, viewModel,db) }
                     composable("allticket") { allticketpage(db) }
+                    composable("aboutme"){ abortmepage() }
                 }
             }
         }

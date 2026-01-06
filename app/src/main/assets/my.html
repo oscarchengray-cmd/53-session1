@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSCAR | DIGITAL CARD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --accent: #3b82f6;
+            --gray: #f2f2f2;
+            --duration: 0.8s;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        /* 1. 打字機標題 */
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+            min-height: 1.2em; /* 防止閃爍 */
+        }
+        .typewriter {
+            color: var(--text);
+            border-right: 3px solid var(--accent);
+            animation: blink 0.7s infinite;
+        }
+        @keyframes blink { 50% { border-color: transparent; } }
+
+        /* 2. 生日標籤 (初始隱藏) */
+        .birthday {
+            font-size: 1rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--duration) var(--ease);
+        }
+
+        /* 3. 按鈕清單 (初始隱藏) */
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            display: block;
+            padding: 18px;
+            border: 1px solid var(--text);
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            border-radius: 50px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--duration) var(--ease);
+        }
+
+        .btn:hover {
+            background: var(--text);
+            color: var(--white) !important;
+            transform: scale(1.05);
+            background-color: black;
+            color: white;
+        }
+
+        /* 激活顯示類別 */
+        .reveal { opacity: 1 !important; transform: translateY(0) !important; }
+
+        footer {
+            margin-top: 50px;
+            font-size: 0.7rem;
+            color: #ccc;
+            opacity: 0;
+            transition: 1s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="hero-title">Hi, I'm <span class="typewriter" id="typewriter"></span></h1>
+        <p class="birthday" id="birthday">99 / 03 / 11</p>
+
+        <div class="links">
+            <a href="https://www.instagram.com/oscarcheng.ray/" class="btn" target="_blank" style="transition-delay: 0.1s;">INSTAGRAM</a>
+            <a href="https://www.facebook.com/oscarcheng.ray" class="btn" target="_blank" style="transition-delay: 0.2s;">FACEBOOK</a>
+            <a href="javascript:void(0)" onclick="copyDC()" class="btn" id="dcBtn" style="transition-delay: 0.3s;">DISCORD: oscarcheng.ray</a>
+            <a href="tel:0905568152" class="btn" style="transition-delay: 0.4s; background: var(--text); color: white;">CALL: 0905568152</a>
+        </div>
+
+        <footer id="footer">DIGITAL BUSINESS CARD &copy; 2026</footer>
+    </div>
+
+    <script>
+        const text = "Oscar.";
+        let i = 0;
+        const typewriterEl = document.getElementById("typewriter");
+
+        // 打字機邏輯
+        function type() {
+            if (i < text.length) {
+                typewriterEl.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, 150);
+            } else {
+                // 打字結束後，觸發其他元件浮現
+                setTimeout(revealElements, 300);
+            }
+        }
+
+        function revealElements() {
+            document.getElementById("birthday").classList.add("reveal");
+            const btns = document.querySelectorAll(".btn");
+            btns.forEach(btn => btn.classList.add("reveal"));
+            document.getElementById("footer").style.opacity = "1";
+            typewriterEl.style.borderRight = "none"; // 停止閃爍游標
+        }
+
+        // Discord 複製功能
+        function copyDC() {
+            const dcID = "oscarcheng.ray";
+            navigator.clipboard.writeText(dcID).then(() => {
+                const btn = document.getElementById('dcBtn');
+                btn.innerText = "COPIED TO CLIPBOARD!";
+                setTimeout(() => { btn.innerText = "DISCORD: oscarcheng.ray"; }, 2000);
+            });
+        }
+
+        window.onload = type;
+    </script>
+</body>
+</html>

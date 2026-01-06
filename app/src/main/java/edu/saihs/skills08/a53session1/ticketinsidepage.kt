@@ -1,12 +1,12 @@
 package edu.saihs.skills08.a53session1
 
-import android.R.attr.shape
-import android.util.Log
+import android.app.Dialog
 import android.widget.Toast
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,14 +21,12 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -37,18 +35,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.colorspace.Illuminant.B
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -62,8 +58,9 @@ fun ticketinsidepage(
     db: AppDatabase
 ) {
     val scope = rememberCoroutineScope()
-    var showDialog by remember { mutableStateOf(false) }
+    var showdate by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+    var showloading by remember { mutableStateOf(false) }
     val amount by viewModel.numbers.observeAsState(initial = emptyList())
     var name = listOf("一日票", "雙日票", "優待票", "敬老票", "學生票")
     var total = 0
@@ -175,7 +172,7 @@ fun ticketinsidepage(
             modifier = Modifier
                 .padding(vertical = 10.dp)
                 .size(400.dp, 50.dp)
-                .clickable{showDialog = true},
+                .clickable { showdate = true },
             enabled = false
 
         )
@@ -214,7 +211,7 @@ fun ticketinsidepage(
                         Toast.makeText(context, "電話格式錯誤", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(context, "送出成功", Toast.LENGTH_SHORT).show()
-
+                        showloading = true
                         scope.launch {
                             db.dao.insertTicket(
                                 Ticket(
@@ -235,9 +232,9 @@ fun ticketinsidepage(
                 Text("確認購買")
             }
         }
-        if (showDialog) {
+        if (showdate) {
             DatePickerDialog(
-                onDismissRequest = { showDialog = false },
+                onDismissRequest = { showdate = false },
                 confirmButton = {
                     TextButton(onClick = {
                         val date = datePickerState.selectedDateMillis
@@ -245,13 +242,13 @@ fun ticketinsidepage(
                             val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
                             text4 = formatter.format(Date(date))
                         }
-                        showDialog = false
+                        showdate = false
                     }) {
                         Text("確定")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDialog = false }) {
+                    TextButton(onClick = { showdate = false }) {
                         Text("取消")
                     }
                 }
@@ -259,5 +256,25 @@ fun ticketinsidepage(
                 DatePicker(state = datePickerState)
             }
         }
+        if (showloading) {
+            LaunchedEffect(Unit) {
+                delay(2000)
+                showloading = false
+            }
+            Dialog(onDismissRequest = {}) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painter = painterResource(id= R.drawable._2),null, modifier = Modifier.size(200.dp)
+                    )
+                    Text("購買成功", fontSize = 30.sp, color = Color.White)
+                }
+
+                }
+            }
+        }
+
     }
 }
